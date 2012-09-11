@@ -3,7 +3,8 @@
 import operator, functools, subprocess, sys, json, os
 import classes
 from common import apply_f, compose, attrdict, Rattrdict
-from coordinates import Commands, Skill, Skills, SLOT_ASSOC, SPARE_PASSIVES
+from coordinates import Commands, Skill, Skills, VALID_SLOTS,\
+    SLOT_ASSOC, SPARE_PASSIVES
 
 p = functools.partial
 op = operator
@@ -16,13 +17,6 @@ jp = p(json.dumps, indent = 2)
     'add', 'switch', 'use', 'remove', 'assign', 'list',
     'show', 'store', 'revert', 'character', 'build'
 )
-VALID_SLOTS = (
-    'mouse_0', 'mouse_1',
-    'key_0', 'key_1', 'key_2', 'key_3',
-    'passive_0', 'passive_1', 'passive_2',
-)
-KNOWN_ABILITIES = classes.KNOWN_ABILITIES
-ABILITY_ASSOC = classes.ABILITY_ASSOC
 
 @apply_f('\n'.join)
 def skill_movement(old_ability, new_ability):
@@ -65,7 +59,7 @@ def generate_script(current, proposed):
         passives = ( )
         for slot, ability in build.items():
             internal_slot = SLOT_ASSOC.get(slot)
-            internal_ability = ABILITY_ASSOC.get(ability)
+            internal_ability = classes.ABILITY_ASSOC.get(ability)
             if internal_slot in Skills.active:
                 actives += ((internal_slot, internal_ability),)
             if internal_slot in Skills.passive:
@@ -200,7 +194,7 @@ def handle_input(config, arguments):
 
     def build_assign(slot, ability):
         character = config.characters[config.current_character]
-        if slot in VALID_SLOTS and ability in KNOWN_ABILITIES:
+        if slot in VALID_SLOTS and ability in classes.KNOWN_ABILITIES:
             character.build[slot] = ability
             return 'Assigning %s to %s in build %s' %\
                     (slot, ability, character.build.name)
